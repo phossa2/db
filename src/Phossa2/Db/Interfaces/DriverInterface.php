@@ -23,6 +23,7 @@ use Phossa2\Shared\Error\ErrorAwareInterface;
  *
  * Db driver interface
  *
+ * @method
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
  * @see     ConnectInterface
@@ -77,15 +78,6 @@ interface DriverInterface extends ConnectInterface, TransactionInterface, ErrorA
      * @api
      */
     public function getResult()/*# : ResultInterface */;
-
-    /**
-     * Affected rows after $this->query()
-     *
-     * @return int
-     * @access public
-     * @api
-     */
-    public function affectedRows()/*# : int */;
 
     /**
      * Get last insert id

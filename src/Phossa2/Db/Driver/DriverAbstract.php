@@ -27,9 +27,20 @@ use Phossa2\Db\Interfaces\DriverInterface;
 use Phossa2\Shared\Aware\TagAwareInterface;
 use Phossa2\Db\Exception\NotFoundException;
 use Phossa2\Db\Interfaces\StatementInterface;
+use Phossa2\Db\Exception\BadMethodCallException;
 
 /**
  * DriverAbstract
+ *
+ * These methods are from ResultInterface
+ *
+ * @method bool isSelect()
+ * @method int fieldCount()
+ * @method int rowCount()
+ * @method int affectedRows()
+ * @method array fetchAll()
+ * @method array fetchRow(int $rowCount)
+ * @method array fetchCol(int $col, int $rowCount)
  *
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
@@ -75,6 +86,27 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
             );
         }
         $this->connect_parameters = $parameters;
+    }
+
+    /**
+     *
+     * @param  string $method
+     * @param  array $args
+     * @return mixed
+     * @throws BadMethodCallException
+     * @access public
+     */
+    public function __call(/*# string */ $method, array $args)
+    {
+        $result = $this->getResult();
+        if (method_exists($result, $method)) {
+            return call_user_func_array([$result, $method], $args);
+        }
+
+        throw new BadMethodCallException(
+            Message::get(Message::MSG_METHOD_NOTFOUND, $method),
+            Message::MSG_METHOD_NOTFOUND
+        );
     }
 
     /**
@@ -132,18 +164,6 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     public function getResult()/*# : ResultInterface */
     {
         return $this->getStatement()->getResult();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function affectedRows()/*# : int */
-    {
-        try {
-            return $this->getResult()->affectedRows();
-        } catch (\Exception $e) {
-            return 0;
-        }
     }
 
     /**
