@@ -21,6 +21,7 @@ use Phossa2\Shared\Base\StaticAbstract;
  *
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
+ * @see     StaticAbstract
  * @version 2.0.0
  * @since   2.0.0 added
  */

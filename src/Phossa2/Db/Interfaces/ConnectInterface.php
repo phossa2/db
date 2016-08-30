@@ -15,12 +15,11 @@
 namespace Phossa2\Db\Interfaces;
 
 use Phossa2\Db\Exception\LogicException;
-use Phossa2\Db\Exception\RuntimeException;
 
 /**
  * ConnectInterface
  *
- * Driver connection related
+ * Part of DriverInterface, connection related
  *
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
@@ -33,7 +32,7 @@ interface ConnectInterface
      * Connect to the db
      *
      * @return $this
-     * @throws RuntimeException if connect failed
+     * @throws LogicException if connect failed
      * @access public
      * @api
      */
@@ -70,7 +69,7 @@ interface ConnectInterface
      * Get the connection link
      *
      * @return mixed
-     * @throws RuntimeException if connect failed
+     * @throws LogicException if connect failed
      * @access public
      * @api
      */

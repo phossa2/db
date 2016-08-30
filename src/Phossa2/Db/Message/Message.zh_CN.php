@@ -32,4 +32,10 @@ return [
     Message::DB_TRANSACTION_NOTIN => '不在数据交易状态',
     Message::DB_EXTENSION_NOTLOAD => '数据库驱动 "%s" 的扩展没有装载',
     Message::DB_STMT_NOTPREPARED => '数据库执行语句还未预处理',
+    Message::DB_STMT_NO_RESULT => '数据语句还没有结果集合',
+    Message::DB_STMT_PREPARE_FAIL => '查询语句 "%s" 预处理失败',
+    Message::DB_STMT_EXECUTE_FAIL => '查询语句 "%s" 执行失败',
+    Message::DB_RESULT_NOT_SELECT => '查询语句不是 SELECT',
+    Message::DB_RESULT_FETCHED => '查询语句结果已经获取了',
+    Message::DB_ATTRIBUTE_UNKNOWN => '数据库设置 "%s" 未知',
 ];

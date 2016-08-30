@@ -62,6 +62,36 @@ class Message extends BaseMessage
      */
     const DB_STMT_NOTPREPARED = 1608291040;
 
+    /*
+     * Statement has no result yet
+     */
+    const DB_STMT_NO_RESULT = 1608291041;
+
+    /*
+     * Statement "%s" prepare failed
+     */
+    const DB_STMT_PREPARE_FAIL = 1608291042;
+
+    /*
+     * Statement "%s" execution failed
+     */
+    const DB_STMT_EXECUTE_FAIL = 1608291043;
+
+    /*
+     * Statement not a SELECT query
+     */
+    const DB_RESULT_NOT_SELECT = 1608291050;
+
+    /*
+     * Statement result fetched already
+     */
+    const DB_RESULT_FETCHED = 1608291051;
+
+    /*
+     * DB attribute "%s" unknown
+     */
+    const DB_ATTRIBUTE_UNKNOWN = 1608291060;
+
     /**
      * {@inheritDoc}
      */
@@ -73,5 +103,11 @@ class Message extends BaseMessage
         self::DB_TRANSACTION_NOTIN => 'Not in db transaction mode',
         self::DB_EXTENSION_NOTLOAD => 'Driver extension not loaded for "%s"',
         self::DB_STMT_NOTPREPARED => 'Statement not prepared yet',
+        self::DB_STMT_NO_RESULT => 'Statement has no result yet',
+        self::DB_STMT_PREPARE_FAIL => 'Statement "%s" prepare failed',
+        self::DB_STMT_EXECUTE_FAIL => 'Statement "%s" execution failed',
+        self::DB_RESULT_NOT_SELECT => 'Statement not a SELECT query',
+        self::DB_RESULT_FETCHED => 'Statement result fetched already',
+        self::DB_ATTRIBUTE_UNKNOWN => 'DB attribute "%s" unknown',
     ];
 }

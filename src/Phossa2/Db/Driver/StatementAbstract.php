@@ -12,12 +12,14 @@
  */
 /*# declare(strict_types=1); */
 
-namespace Phossa2\Db\Traits;
+namespace Phossa2\Db\Driver;
 
 use Phossa2\Db\Message\Message;
+use Phossa2\Db\Traits\DriverAwareTrait;
 use Phossa2\Shared\Base\ObjectAbstract;
 use Phossa2\Db\Interfaces\ResultInterface;
 use Phossa2\Db\Exception\RuntimeException;
+use Phossa2\Db\Exception\NotFoundException;
 use Phossa2\Db\Interfaces\StatementInterface;
 
 /**
@@ -57,6 +59,16 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
     protected $result;
 
     /**
+     * Desctructor
+     *
+     * @access public
+     */
+    public function __destruct()
+    {
+        $this->close();
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function prepare(/*# string */ $sql)/*# : bool */
@@ -66,45 +78,61 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
         }
 
         // prepare statement
-        $this->prepared = $this->realPrepare(
-            $this->getDriver()->getLink(),
-            (string) $sql
+        try {
+            $res = $this->realPrepare($this->getDriver()->getLink(),$sql);
+
+            if (false !== $res) {
+                $this->prepared = $res;
+                $this->getDriver()->getProfiler()->setSql($sql);
+                return true;
+            }
+        } catch (\Exception $e) {
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+        throw new RuntimeException(
+            Message::get(Message::DB_STMT_PREPARE_FAIL, $sql),
+            Message::DB_STMT_PREPARE_FAIL
         );
-
-        // profiling
-        $this->getDriver()->getProfiler()->setSql($sql);
-
-        return true;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function execute(array $parameters = [])
+    public function execute(array $parameters = [])/*# : bool */
     {
-        if (!$this->prepared) {
+        if (null === $this->prepared) {
             throw new RuntimeException(
                 Message::get(Message::DB_STMT_NOTPREPARED),
                 Message::DB_STMT_NOTPREPARED
             );
         }
 
-        // close previous statement if any
-        $this->closePreviousStatement();
+        // close previous result for this statement
+        $this->close();
 
         // start time
         $time = microtime(true);
+        $this->getDriver()->getProfiler()->setParameters($parameters);
 
-        $result = clone $this->result_prototype;
-        $this->result($this->prepared);
-        $this->realExecute($parameters);
+        if ($this->realExecute($parameters)) {
+            $result = clone $this->result_prototype;
+            $result($this->prepared);
+            $this->result = $result;
 
-        // profiling
-        $this->getDriver()->getProfiler()
-            ->setParameters($parameters)
-            ->setExecutionTime(microtime(true) - $time);
+            // profiling
+            $this->getDriver()->getProfiler()
+                ->setExecutionTime(microtime(true) - $time);
 
-        return true;
+            return true;
+        }
+
+        throw new RuntimeException(
+            Message::get(
+                Message::DB_STMT_EXECUTE_FAIL,
+                $this->getDriver()->getProfiler()->getSql()
+            ),
+            Message::DB_STMT_EXECUTE_FAIL
+        );
     }
 
     /**
@@ -112,26 +140,24 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     public function getResult()/*# : ResultInterface */
     {
+        if (null === $this->result) {
+            throw new NotFoundException(
+                Message::get(Message::DB_STMT_NO_RESULT),
+                Message::DB_STMT_NO_RESULT
+            );
+        }
         return $this->result;
     }
 
     /**
-     * Close previous prepared statement for this driver
-     *
-     * @return $this
-     * @access protected
+     * {@inheritDoc}
      */
-    protected function closePreviousStatement()
+    public function close()
     {
-        static $previous = [];
-
-        $id = spl_object_hash($this->getDriver());
-        if (isset($previous[$id]) && $previous[$id] !== $this->prepared) {
-            $this->realClose($previous[$id]);
+        if ($this->prepared) {
+            $this->realClose($this->prepared);
+            $this->result = null;
         }
-        $previous[$id] = $this->prepared;
-
-        return $this;
     }
 
     /**

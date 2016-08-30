@@ -14,10 +14,12 @@
 
 namespace Phossa2\Db\Interfaces;
 
+use Phossa2\Db\Exception\LogicException;
+
 /**
  * TransactionInterface
  *
- * Transaction related
+ * Part of DriverInterface, transaction related
  *
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>

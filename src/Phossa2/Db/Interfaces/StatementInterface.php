@@ -15,6 +15,7 @@
 namespace Phossa2\Db\Interfaces;
 
 use Phossa2\Db\Exception\RuntimeException;
+use Phossa2\Db\Exception\NotFoundException;
 
 /**
  * StatementInterface
@@ -53,8 +54,16 @@ interface StatementInterface extends DriverAwareInterface
      * Returns the result set
      *
      * @return ResultInterface
+     * @throws NotFoundException if result not found
      * @access public
      * @api
      */
     public function getResult()/*# : ResultInterface */;
+
+    /**
+     * Close this statement
+     *
+     * @access public
+     */
+    public function close();
 }

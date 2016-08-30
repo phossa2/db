@@ -24,6 +24,7 @@ use Phossa2\Db\Traits\ProfilerAwareTrait;
 use Phossa2\Shared\Error\ErrorAwareTrait;
 use Phossa2\Db\Interfaces\DriverInterface;
 use Phossa2\Shared\Aware\TagAwareInterface;
+use Phossa2\Db\Exception\NotFoundException;
 use Phossa2\Db\Interfaces\StatementInterface;
 
 /**
@@ -39,7 +40,7 @@ use Phossa2\Db\Interfaces\StatementInterface;
  */
 abstract class DriverAbstract extends ObjectAbstract implements DriverInterface, TagAwareInterface
 {
-    use ConnectTrait, TransactionTrait, ErrorAwareTrait, TagAwareTrait, ProfilerAwareTrait;
+    use ConnectTrait, TransactionTrait, ErrorAwareTrait, ProfilerAwareTrait, TagAwareTrait;
 
     /**
      * Statement prototype
@@ -78,8 +79,12 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     /**
      * {@inheritDoc}
      */
-    public function prepare(/*# string */ $sql)
+    public function prepare(/*# string */ $sql)/*# : bool */
     {
+        if ($this->statement) {
+            $this->statement->close();
+        }
+
         // new statement
         $this->statement = clone $this->statement_prototype;
         $this->statement->setDriver($this);
@@ -96,17 +101,25 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      */
     public function getStatement()/*# : StatementInterface */
     {
+        if (null === $this->statement) {
+            throw new NotFoundException(
+                Message::get(Message::DB_STMT_NOTPREPARED),
+                Message::DB_STMT_NOTPREPARED
+            );
+        }
         return $this->statement;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function query(/*# string */ $sql, array $parameters = [])
-    {
+    public function query(
+        /*# string */ $sql,
+        array $parameters = []
+    )/*# : bool */ {
         try {
-            return $this->prepare($sql) &&
-                $this->getStatement()->execute($parameters);
+            $this->prepare($sql) && $this->getStatement()->execute($parameters);
+            return true;
         } catch (\Exception $e) {
             return $this->setError($e->getMessage(), $e->getCode());
         }
@@ -125,10 +138,11 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      */
     public function affectedRows()/*# : int */
     {
-        if ($this->statement) {
+        try {
             return $this->getResult()->affectedRows();
+        } catch (\Exception $e) {
+            return 0;
         }
-        return 0;
     }
 
     /**

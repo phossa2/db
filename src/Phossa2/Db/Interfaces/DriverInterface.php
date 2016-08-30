@@ -14,6 +14,7 @@
 
 namespace Phossa2\Db\Interfaces;
 
+use Phossa2\Db\Exception\NotFoundException;
 use Phossa2\Shared\Error\ErrorAwareInterface;
 
 /**
@@ -46,6 +47,7 @@ interface DriverInterface extends ConnectInterface, TransactionInterface, ErrorA
      * Get the prepared statement after $this->prepare()
      *
      * @return StatementInterface
+     * @throws NotFoundException
      * @access public
      * @api
      */
@@ -69,6 +71,7 @@ interface DriverInterface extends ConnectInterface, TransactionInterface, ErrorA
      * Get the result after $this->query()
      *
      * @return ResultInterface
+     * @throws NotFoundException either statement or result not found
      * @access public
      * @api
      */
