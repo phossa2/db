@@ -16,6 +16,7 @@ namespace Phossa2\Db\Driver\Pdo;
 
 use Phossa2\Db\Types;
 use Phossa2\Db\Driver\StatementAbstract;
+use Phossa2\Db\Interfaces\ResultInterface;
 
 /**
  * Statement
@@ -30,6 +31,17 @@ use Phossa2\Db\Driver\StatementAbstract;
  */
 class Statement extends StatementAbstract
 {
+    /**
+     * Constructor
+     *
+     * @param  ResultInterface $resultPrototype
+     * @access public
+     */
+    public function __construct(ResultInterface $resultPrototype)
+    {
+        $this->result_prototype = $resultPrototype ?: new Result();
+    }
+
     /**
      * {@inheritDoc}
      */

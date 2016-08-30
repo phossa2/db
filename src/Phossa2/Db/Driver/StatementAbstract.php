@@ -105,8 +105,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
 
         if ($this->realExecute($parameters)) {
             $result = clone $this->result_prototype;
-            $result($this->prepared);
-            $this->result = $result;
+            $this->result = $result($this->prepared);
             $this->getDriver()->getProfiler()->setExecutionTime(microtime(true) - $time);
             return true;
         }
