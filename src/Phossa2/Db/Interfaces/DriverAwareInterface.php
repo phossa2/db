@@ -35,6 +35,12 @@ interface DriverAwareInterface
     public function setDriver(DriverInterface $driver);
 
     /**
+     * @return bool
+     * @access public
+     */
+    public function hasDriver()/*# : bool */;
+
+    /**
      * Get the driver
      *
      * @return value

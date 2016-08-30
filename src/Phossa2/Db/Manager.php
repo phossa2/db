@@ -148,7 +148,8 @@ class Manager extends ObjectAbstract implements ManagerInterface
     {
         $matched = [];
         foreach ($this->drivers as $id => $driver) {
-            if ($driver->ping() && $this->tagMatched($tag, $driver)) {
+            // TODO if ($driver->ping() && $this->tagMatched($tag, $driver)) {
+            if ($this->tagMatched($tag, $driver)) {
                 $this->expandWithFactor($matched, $id);
             }
         }

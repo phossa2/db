@@ -165,7 +165,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         /*# int */ $type = Types::PARAM_STR
     )/*# : string */ {
         if ($this->isConnected()) {
-            return $this->readlQuote($string, Types::guessType($string, $type));
+            return $this->realQuote($string, Types::guessType($string, $type));
         }
         // default
         return "'" . $string . "'";

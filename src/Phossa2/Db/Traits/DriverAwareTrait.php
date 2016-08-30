@@ -50,6 +50,14 @@ trait DriverAwareTrait
     /**
      * {@inheritDoc}
      */
+    public function hasDriver()/*# : bool */
+    {
+        return null !== $this->driver;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getDriver()/*# : DriverInterface */
     {
         if (null === $this->driver) {

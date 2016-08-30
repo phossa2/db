@@ -83,7 +83,11 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
      */
     public function getSql()/*# : string */
     {
-        return empty($this->params) ? $this->sql : $this->replaceParamInSql();
+        if (!empty($this->params) && $this->hasDriver()) {
+            return $this->replaceParamInSql();
+        } else {
+            return $this->sql;
+        }
     }
 
     /**
