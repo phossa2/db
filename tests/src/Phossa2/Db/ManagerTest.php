@@ -41,7 +41,10 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddDriver1()
     {
-        $driver = new PDO_Driver([]);
+        $driver = new PDO_Driver([
+            'dsn' => 'mysql:dbname=mysql;host=127.0.0.1;charset=utf8'
+        ]);
+
         $this->object->addDriver($driver);
         $this->assertEquals($driver, $this->object->getDriver());
 
@@ -59,7 +62,9 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddDriver2()
     {
-        $driver = new PDO_Driver([]);
+        $driver = new PDO_Driver([
+            'dsn' => 'mysql:dbname=mysql;host=127.0.0.1;charset=utf8'
+        ]);
         $driver->addTag('RW');
         $this->assertEquals($driver, $this->object->getDriver('RO'));
     }

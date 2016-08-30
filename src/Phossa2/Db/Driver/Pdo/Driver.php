@@ -110,10 +110,6 @@ class Driver extends DriverAbstract
             isset($parameters['password']) ? $parameters['password'] : null,
             isset($parameters['options']) ? $parameters['options'] : null
         );
-
-        // set default attributes
-        $this->setDefaultAttributes();
-
         return $link;
     }
 
@@ -134,7 +130,7 @@ class Driver extends DriverAbstract
         try {
             return (bool) $this->link->query('SELECT 1');
         } catch (\Exception $e) {
-            return false;
+            return $this->setError($e->getMessage(), $e->getCode());
         }
     }
 
@@ -190,20 +186,6 @@ class Driver extends DriverAbstract
     {
         $this->link->rollBack();
         return $this;
-    }
-
-    /**
-     * Set default attributes
-     *
-     * @access protected
-     */
-    protected function setDefaultAttributes()
-    {
-        if (!empty($this->attributes)) {
-            foreach ($this->attributes as $attr => $val) {
-                $this->realSetAttribute($attr, $val);
-            }
-        }
     }
 
     /**

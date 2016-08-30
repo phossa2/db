@@ -65,6 +65,7 @@ trait ConnectTrait
 
         try {
             $this->link = $this->realConnect($this->connect_parameters);
+            $this->setDefaultAttributes();
         } catch (\Exception $e) {
             throw new LogicException($e->getMessage(), $e->getCode());
         }
@@ -96,10 +97,12 @@ trait ConnectTrait
      */
     public function ping()/*# : bool */
     {
-        if ($this->isConnected()) {
-            return $this->realPing();
+        try {
+            $this->connect();
+        } catch (\Exception $e) {
+            return $this->setError($e->getMessage(), $e->getCode());
         }
-        return false;
+        return $this->realPing();
     }
 
     /**
@@ -137,6 +140,20 @@ trait ConnectTrait
             return $real ?: $curr;
         } else {
             return $curr;
+        }
+    }
+
+    /**
+     * Set default attributes
+     *
+     * @access protected
+     */
+    protected function setDefaultAttributes()
+    {
+        if (!empty($this->attributes)) {
+            foreach ($this->attributes as $attr => $val) {
+                $this->realSetAttribute($attr, $val);
+            }
         }
     }
 
@@ -187,4 +204,10 @@ trait ConnectTrait
      * @access protected
      */
     abstract protected function realGetAttribute(/*# string */ $attribute);
+
+    // from ErrorAwareInterface
+    abstract public function setError(
+        /*# string */ $message = '',
+        /*# string */ $code = ''
+    )/*# : bool */;
 }
