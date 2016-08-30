@@ -14,6 +14,7 @@
 
 namespace Phossa2\Db\Interfaces;
 
+use Phossa2\Db\Types;
 use Phossa2\Db\Exception\NotFoundException;
 use Phossa2\Shared\Error\ErrorAwareInterface;
 
@@ -95,4 +96,18 @@ interface DriverInterface extends ConnectInterface, TransactionInterface, ErrorA
      * @api
      */
     public function lastInsertId($name = null);
+
+    /**
+     * Quote the $string
+     *
+     * @param  bool|int|string|null $string
+     * @param  int $type data type
+     * @return string
+     * @access public
+     * @api
+     */
+    public function quote(
+        $string,
+        /*# int */ $type = Types::PARAM_STR
+    )/*# : string */;
 }

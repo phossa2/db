@@ -114,7 +114,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
             Message::get(
                 Message::DB_STMT_EXECUTE_FAIL,
                 $this->getDriver()->getProfiler()->getSql()
-            ),Message::DB_STMT_EXECUTE_FAIL
+            ), Message::DB_STMT_EXECUTE_FAIL
         );
     }
 

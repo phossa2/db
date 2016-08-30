@@ -37,7 +37,7 @@ class Statement extends StatementAbstract
      * @param  ResultInterface $resultPrototype
      * @access public
      */
-    public function __construct(ResultInterface $resultPrototype)
+    public function __construct(ResultInterface $resultPrototype = null)
     {
         $this->result_prototype = $resultPrototype ?: new Result();
     }

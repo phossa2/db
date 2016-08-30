@@ -164,6 +164,7 @@ class Manager extends ObjectAbstract implements ManagerInterface
      */
     protected function expandWithFactor(array &$matched, /*# string */ $id)
     {
+        // repeat $f times in $matched
         $f = $this->factors[$id];
         for ($i = 0; $i < $f; ++$i) {
             $matched[] = $id;

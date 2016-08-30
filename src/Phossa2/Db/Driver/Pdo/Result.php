@@ -59,10 +59,7 @@ class Result extends ResultAbstract
      */
     public function rowCount()/*# : int */
     {
-        if ($this->statement) {
-            return $this->statement->rowCount();
-        }
-        return 0;
+        return $this->statement->rowCount();
     }
 
     /**
@@ -70,7 +67,7 @@ class Result extends ResultAbstract
      */
     public function affectedRows()/*# : int */
     {
-        return $this->statement->rowCount();
+        return $this->rowCount();
     }
 
     /**

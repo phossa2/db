@@ -14,7 +14,6 @@
 
 namespace Phossa2\Db\Traits;
 
-use Phossa2\Db\Message\Message;
 use Phossa2\Db\Exception\LogicException;
 use Phossa2\Db\Interfaces\ConnectInterface;
 
@@ -64,13 +63,10 @@ trait ConnectTrait
             return $this;
         }
 
-        $this->realConnect($this->connect_parameters);
-
-        if (!$this->isConnected()) {
-            throw new LogicException(
-                Message::get(Message::DB_CONNECT_FAIL),
-                Message::DB_CONNECT_FAIL
-            );
+        try {
+            $this->link = $this->realConnect($this->connect_parameters);
+        } catch (\Exception $e) {
+            throw new LogicException($e->getMessage(), $e->getCode());
         }
         return $this;
     }
@@ -148,7 +144,8 @@ trait ConnectTrait
      * Driver specific connect
      *
      * @param  array $parameters
-     * @throws LogicException
+     * @return mixed the link
+     * @throws \Exception
      * @access protected
      */
     abstract protected function realConnect(array $parameters);

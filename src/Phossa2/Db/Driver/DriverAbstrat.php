@@ -14,6 +14,7 @@
 
 namespace Phossa2\Db\Driver;
 
+use Phossa2\Db\Types;
 use Phossa2\Db\Message\Message;
 use Phossa2\Db\Traits\ConnectTrait;
 use Phossa2\Shared\Aware\TagAwareTrait;
@@ -118,7 +119,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         array $parameters = []
     )/*# : bool */ {
         try {
-            $this->prepare($sql) && $this->getStatement()->execute($parameters);
+            $this->prepare($sql) && $this->statement->execute($parameters);
             return true;
         } catch (\Exception $e) {
             return $this->setError($e->getMessage(), $e->getCode());
@@ -157,6 +158,20 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function quote(
+        $string,
+        /*# int */ $type = Types::PARAM_STR
+    )/*# : string */ {
+        if ($this->isConnected()) {
+            return $this->readlQuote($string, Types::guessType($string, $type));
+        }
+        // default
+        return "'" . $string . "'";
+    }
+
+    /**
      * Check driver specific extension loaded or not
      *
      * @return bool
@@ -172,4 +187,17 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * @access protected
      */
     abstract protected function realLastId($name);
+
+    /**
+     * The real quote method
+     *
+     * @param  mixed $string
+     * @param  int $type
+     * @return string
+     * @access protected
+     */
+    abstract protected function realQuote(
+        $string,
+        /*# int */ $type
+    )/*# : string */;
 }

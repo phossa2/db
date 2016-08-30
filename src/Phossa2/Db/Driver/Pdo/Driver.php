@@ -92,9 +92,19 @@ class Driver extends DriverAbstract
     /**
      * {@inheritDoc}
      */
+    protected function realQuote(
+        $string,
+        /*# int */ $type
+    )/*# : string */ {
+        return $this->link->quote($string, $type);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     protected function realConnect(array $parameters)
     {
-        $this->link = new \PDO(
+        $link = new \PDO(
             $parameters['dsn'],
             isset($parameters['username']) ? $parameters['username'] : 'root',
             isset($parameters['password']) ? $parameters['password'] : null,
@@ -104,7 +114,7 @@ class Driver extends DriverAbstract
         // set default attributes
         $this->setDefaultAttributes();
 
-        return $this;
+        return $link;
     }
 
     /**

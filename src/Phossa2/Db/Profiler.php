@@ -119,7 +119,7 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
                     $res = $params[$count++];
                 } else {
                     $res = isset($params[$m[0]]) ? $params[$m[0]] :
-                    $params[substr($m[0],1)];
+                        $params[substr($m[0], 1)];
                 }
                 return $this->getDriver()->quote($res);
             }, $this->sql);
