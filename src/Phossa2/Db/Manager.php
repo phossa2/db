@@ -148,17 +148,26 @@ class Manager extends ObjectAbstract implements ManagerInterface
     {
         $matched = [];
         foreach ($this->drivers as $id => $driver) {
-            if (!$driver->ping()) {
-                continue;
-            }
-            if ($this->tagMatched($tag, $driver)) {
-                $f = $this->factors[$id];
-                for ($i = 0; $i < $f; ++$i) {
-                    $matched[] = $id;
-                }
+            if ($driver->ping() && $this->tagMatched($tag, $driver)) {
+                $this->expandWithFactor($matched, $id);
             }
         }
         return $matched;
+    }
+
+    /**
+     * Expand into $matched with factor weight
+     *
+     * @param  array &$matched
+     * @param  string $id
+     * @access protected
+     */
+    protected function expandWithFactor(array &$matched, /*# string */ $id)
+    {
+        $f = $this->factors[$id];
+        for ($i = 0; $i < $f; ++$i) {
+            $matched[] = $id;
+        }
     }
 
     /**

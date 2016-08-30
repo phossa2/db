@@ -75,22 +75,12 @@ abstract class ResultAbstract extends ObjectAbstract implements ResultInterface
     public function fetchCol($col = 0, $rowCount = 0)/*# : array */
     {
         $rows = $rowCount ? $this->fetchRow($rowCount) : $this->fetchAll();
-
-        $cols = $keys = [];
+        $cols = [];
         foreach($rows as $row) {
-            // named or indexed column
             if (isset($row[$col])) {
                 $cols[] = $row[$col];
-
-            // n'th column
-            } elseif (is_int($col) && count($row) >= $col) {
-                if (empty($keys)) {
-                    $keys = array_keys($row);
-                }
-                $cols[] = $row[$keys[$col]];
             }
         }
-
         return $cols;
     }
 

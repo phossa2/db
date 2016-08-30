@@ -156,7 +156,6 @@ trait ConnectTrait
     /**
      * Driver specific disconnect
      *
-     * @return $this
      * @access protected
      */
     abstract protected function realDisconnect();

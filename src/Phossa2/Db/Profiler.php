@@ -83,25 +83,7 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
      */
     public function getSql()/*# : string */
     {
-        if (empty($this->params)) {
-            return $this->sql;
-        } else {
-            $count = 0;
-            $params = $this->params;
-            return preg_replace_callback(
-                '/\?|\:\w+/',
-                function($m) use ($count, $params) {
-                    if ('?' === $m[0]) {
-                        $res = $params[$count++];
-                    } else {
-                        $res = isset($params[$m[0]]) ? $params[$m[0]] :
-                        $params[substr($m[0],1)];
-                    }
-                    return $this->getDriver()->quote($res);
-                },
-                $this->sql
-            );
-        }
+        return empty($this->params) ? $this->sql : $this->replaceParamInSql();
     }
 
     /**
@@ -119,5 +101,27 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
     public function getExecutionTime()/*# : float */
     {
         return $this->execution_time;
+    }
+
+    /**
+     * Replace params in the SQL
+     *
+     * @return string
+     * @access protected
+     */
+    protected function replaceParamInSql()/*# : string */
+    {
+        $count = 0;
+        $params = $this->params;
+        return preg_replace_callback(
+            '/\?|\:\w+/', function($m) use ($count, $params) {
+                if ('?' === $m[0]) {
+                    $res = $params[$count++];
+                } else {
+                    $res = isset($params[$m[0]]) ? $params[$m[0]] :
+                    $params[substr($m[0],1)];
+                }
+                return $this->getDriver()->quote($res);
+            }, $this->sql);
     }
 }

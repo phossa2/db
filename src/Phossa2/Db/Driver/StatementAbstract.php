@@ -73,26 +73,22 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     public function prepare(/*# string */ $sql)/*# : bool */
     {
-        if ($this->prepared) {
-            return true;
-        }
-
-        // prepare statement
-        try {
-            $res = $this->realPrepare($this->getDriver()->getLink(),$sql);
-
-            if (false !== $res) {
-                $this->prepared = $res;
-                $this->getDriver()->getProfiler()->setSql($sql);
-                return true;
+        if (null === $this->prepared) {
+            try {
+                $res = $this->realPrepare($this->getDriver()->getLink(), $sql);
+                if (false !== $res) {
+                    $this->prepared = $res;
+                    $this->getDriver()->getProfiler()->setSql($sql);
+                    return true;
+                }
+            } catch (\Exception $e) {
+                throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
             }
-        } catch (\Exception $e) {
-            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+            throw new RuntimeException(
+                Message::get(Message::DB_STMT_PREPARE_FAIL, $sql),
+                Message::DB_STMT_PREPARE_FAIL
+            );
         }
-        throw new RuntimeException(
-            Message::get(Message::DB_STMT_PREPARE_FAIL, $sql),
-            Message::DB_STMT_PREPARE_FAIL
-        );
     }
 
     /**
@@ -100,17 +96,10 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     public function execute(array $parameters = [])/*# : bool */
     {
-        if (null === $this->prepared) {
-            throw new RuntimeException(
-                Message::get(Message::DB_STMT_NOTPREPARED),
-                Message::DB_STMT_NOTPREPARED
-            );
-        }
+        $this->checkPreparation(); // must be prepared
+        $this->close(); // close previous result if any
 
-        // close previous result for this statement
-        $this->close();
-
-        // start time
+        // int profiler
         $time = microtime(true);
         $this->getDriver()->getProfiler()->setParameters($parameters);
 
@@ -118,11 +107,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
             $result = clone $this->result_prototype;
             $result($this->prepared);
             $this->result = $result;
-
-            // profiling
-            $this->getDriver()->getProfiler()
-                ->setExecutionTime(microtime(true) - $time);
-
+            $this->getDriver()->getProfiler()->setExecutionTime(microtime(true) - $time);
             return true;
         }
 
@@ -130,8 +115,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
             Message::get(
                 Message::DB_STMT_EXECUTE_FAIL,
                 $this->getDriver()->getProfiler()->getSql()
-            ),
-            Message::DB_STMT_EXECUTE_FAIL
+            ),Message::DB_STMT_EXECUTE_FAIL
         );
     }
 
@@ -157,6 +141,22 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
         if ($this->prepared) {
             $this->realClose($this->prepared);
             $this->result = null;
+        }
+    }
+
+    /**
+     * Throw exception if not prepared
+     *
+     * @throws RuntimeException
+     * @access protected
+     */
+    protected function checkPreparation()
+    {
+        if (null === $this->prepared) {
+            throw new RuntimeException(
+                Message::get(Message::DB_STMT_NOTPREPARED),
+                Message::DB_STMT_NOTPREPARED
+            );
         }
     }
 

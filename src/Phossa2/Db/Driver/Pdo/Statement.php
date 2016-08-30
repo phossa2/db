@@ -81,12 +81,25 @@ class Statement extends StatementAbstract
     )/*# : bool */ {
         foreach ($parameters as $name => &$value) {
             $type  = Types::guessType($value);
-            $param = is_int($name) ? ($name + 1) :
-            ($name[0] === ':' ? $name : (':' . $name));
+            $param = $this->fixParam($name);
             if (false === $stmt->bindParam($param, $value, $type)) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Fix param name
+     *
+     * @param  mixed $name
+     * @return string
+     * @access protected
+     */
+    protected function fixParam($name)/*# : string */
+    {
+        return is_int($name) ?
+            ($name + 1) :
+            ($name[0] === ':' ? $name : (':' . $name));
     }
 }

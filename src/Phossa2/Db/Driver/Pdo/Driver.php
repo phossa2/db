@@ -95,18 +95,14 @@ class Driver extends DriverAbstract
     protected function realConnect(array $parameters)
     {
         $this->link = new \PDO(
-            isset($parameters['dsn']) ? $parameters['dsn'] : '',
+            $parameters['dsn'],
             isset($parameters['username']) ? $parameters['username'] : 'root',
             isset($parameters['password']) ? $parameters['password'] : null,
             isset($parameters['options']) ? $parameters['options'] : null
         );
 
-        // set attributes
-        if (!empty($this->attributes)) {
-            foreach ($this->attributes as $attr => $val) {
-                $this->realSetAttribute($attr, $val);
-            }
-        }
+        // set default attributes
+        $this->setDefaultAttributes();
 
         return $this;
     }
@@ -118,7 +114,6 @@ class Driver extends DriverAbstract
      */
     protected function realDisconnect()
     {
-        return $this;
     }
 
     /**
@@ -139,14 +134,8 @@ class Driver extends DriverAbstract
     protected function realSetAttribute(/*# string */ $attribute, $value)
     {
         if (is_string($attribute)) {
-            if (defined($attribute)) {
-                $this->link->setAttribute(constant($attribute), $value);
-            } else {
-                throw new LogicException(
-                    Message::get(Message::DB_ATTRIBUTE_UNKNOWN, $attribute),
-                    Message::DB_ATTRIBUTE_UNKNOWN
-                );
-            }
+            $this->checkAttribute($attribute);
+            $this->link->setAttribute(constant($attribute), $value);
         } else {
             $this->link->setAttribute($attribute, $value);
         }
@@ -159,14 +148,8 @@ class Driver extends DriverAbstract
     protected function realGetAttribute(/*# string */ $attribute)
     {
         if (is_string($attribute)) {
-            if (defined($attribute)) {
-                return $this->link->getAttribute(constant($attribute));
-            } else {
-                throw new LogicException(
-                    Message::get(Message::DB_ATTRIBUTE_UNKNOWN, $attribute),
-                    Message::DB_ATTRIBUTE_UNKNOWN
-                );
-            }
+            $this->checkAttribute($attribute);
+            return $this->link->getAttribute(constant($attribute));
         } else {
             return $this->link->getAttribute($attribute);
         }
@@ -197,5 +180,36 @@ class Driver extends DriverAbstract
     {
         $this->link->rollBack();
         return $this;
+    }
+
+    /**
+     * Set default attributes
+     *
+     * @access protected
+     */
+    protected function setDefaultAttributes()
+    {
+        if (!empty($this->attributes)) {
+            foreach ($this->attributes as $attr => $val) {
+                $this->realSetAttribute($attr, $val);
+            }
+        }
+    }
+
+    /**
+     * Is attribute defined ?
+     *
+     * @param  string $attribute
+     * @throws LogicException
+     * @access protected
+     */
+    protected function checkAttribute(/*# string */ $attribute)
+    {
+        if (!defined($attribute)) {
+            throw new LogicException(
+                Message::get(Message::DB_ATTRIBUTE_UNKNOWN, $attribute),
+                Message::DB_ATTRIBUTE_UNKNOWN
+            );
+        }
     }
 }
