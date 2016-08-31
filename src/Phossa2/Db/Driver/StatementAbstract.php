@@ -102,25 +102,22 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
         $this->checkPreparation();
 
         // int profiler
-        $time = microtime(true);
-        $this->getDriver()->getProfiler()->setParameters($parameters);
+        $this->getDriver()->getProfiler()->setParameters($parameters)->startWatch();
 
         try {
             if ($this->realExecute($parameters)) {
                 $result = clone $this->result_prototype;
                 $this->result = $result($this->prepared);
-                $this->getDriver()->getProfiler()
-                    ->setExecutionTime(microtime(true) - $time);
+                $this->getDriver()->getProfiler()->stopWatch();
                 return true;
             }
         } catch (\Exception $e) {
             throw new RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
         }
-        throw new RuntimeException(
-            Message::get(
-                Message::DB_STMT_EXECUTE_FAIL,
-                $this->getDriver()->getProfiler()->getSql()
-            ), Message::DB_STMT_EXECUTE_FAIL
+        throw new RuntimeException(Message::get(
+            Message::DB_STMT_EXECUTE_FAIL,
+            $this->getDriver()->getProfiler()->getSql()),
+            Message::DB_STMT_EXECUTE_FAIL
         );
     }
 

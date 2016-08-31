@@ -93,9 +93,18 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
     /**
      * {@inheritDoc}
      */
-    public function setExecutionTime(/*# float */ $time)
+    public function startWatch()
     {
-        $this->execution_time = (float) $time;
+        $this->execution_time = microtime(true);
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function stopWatch()
+    {
+        $this->execution_time = microtime(true) - $this->execution_time;
         return $this;
     }
 

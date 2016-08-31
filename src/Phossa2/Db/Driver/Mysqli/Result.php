@@ -125,10 +125,31 @@ class Result extends ResultAbstract
     /**
      * Get one row of data
      *
-     * @return array|null
+     * @return array|false
      * @access protected
      */
     protected function getOneRow()
+    {
+        if ($this->bindResult()) {
+            if ($this->statement->fetch()) {
+                $row = [];
+                foreach($this->cols as $i => $col) {
+                    $row[$col] = $this->vals[$i];
+                }
+                return $row;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Bind result
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function bindResult()/*# : bool */
     {
         if (null === $this->cols) {
             $result = $this->statement->result_metadata();
@@ -150,15 +171,6 @@ class Result extends ResultAbstract
             }
             call_user_func_array([$this->statement, 'bind_result'], $refs);
         }
-
-        if ($this->statement->fetch()) {
-            $row = [];
-            foreach($this->cols as $i => $col) {
-                $row[$col] = $this->vals[$i];
-            }
-            return $row;
-        }
-
-        return false;
+        return true;
     }
 }

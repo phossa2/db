@@ -55,14 +55,22 @@ interface ProfilerInterface extends DriverAwareInterface
     public function getSql()/*# : string */;
 
     /**
-     * Set execution time
+     * Set start time
      *
-     * @param  float $time
      * @return $this
      * @access public
      * @api
      */
-    public function setExecutionTime(/*# float */ $time);
+    public function startWatch();
+
+    /**
+     * Set stop time
+     *
+     * @return $this
+     * @access public
+     * @api
+     */
+    public function stopWatch();
 
     /**
      * Get execution time

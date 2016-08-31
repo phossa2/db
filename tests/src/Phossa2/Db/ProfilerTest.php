@@ -101,27 +101,17 @@ class ProfilerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests Profiler->setExecutionTime()
+     * Tests Profiler->startWatch()
      *
-     * @covers Phossa2\Db\Profiler::setExecutionTime
+     * @covers Phossa2\Db\Profiler::startWatch()
+     * @covers Phossa2\Db\Profiler::stopWatch()
+     * @covers Phossa2\Db\Profiler::getExecutionTime()
      */
-    public function testSetExecutionTime()
+    public function testStartWatch()
     {
-        $time = 2.0;
-        $this->object->setExecutionTime($time);
-        $this->assertEquals($time, $this->getPrivateProperty('execution_time'));
-    }
-
-    /**
-     * Tests Profiler->getExecutionTime()
-     *
-     * @covers Phossa2\Db\Profiler::getExecutionTime
-     */
-    public function testGetExecutionTime()
-    {
-        $this->assertEquals(0.0, $this->object->getExecutionTime());
-
-        $this->object->setExecutionTime(3.0);
-        $this->assertEquals(3.0, $this->object->getExecutionTime());
+        $this->object->startWatch();
+        usleep(200);
+        $this->object->stopWatch();
+        $this->assertTrue($this->object->getExecutionTime() < 1.0);
     }
 }

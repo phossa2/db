@@ -98,18 +98,9 @@ class Statement extends StatementAbstract
         array $parameters
     )/*# : bool */ {
         $types = '';
-        $args  = [];
+        $args = [];
         foreach ($parameters as $name => &$value) {
-            $type = Types::guessType($value);
-            switch ($type) {
-                case Types::PARAM_INT:
-                case Types::PARAM_BOOL:
-                    $types .= 'i';
-                    break;
-                default:
-                    $types .= 's';
-                    break;
-            }
+            $this->combineTypes($types, $value);
             $args[] = &$value;
         }
         if (count($args)) {
@@ -117,5 +108,26 @@ class Statement extends StatementAbstract
             return call_user_func_array([$stmt, 'bind_param'], $args);
         }
         return true;
+    }
+
+    /**
+     * Combine types
+     *
+     * @param  string &$types
+     * @param  mixed $value
+     * @access protected
+     */
+    protected function combineTypes(&$types, $value)
+    {
+        $type = Types::guessType($value);
+        switch ($type) {
+            case Types::PARAM_INT:
+            case Types::PARAM_BOOL:
+                $types .= 'i';
+                break;
+            default:
+                $types .= 's';
+                break;
+        }
     }
 }
