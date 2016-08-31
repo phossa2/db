@@ -142,6 +142,30 @@ Usage
   }
   ```
 
+Mysqli
+---
+
+Mysqli driver is also supported.
+
+```php
+use Phossa2\Db\Driver\Mysqli\Driver as Mysqli_Driver;
+
+$db = new Mysqli_Driver([
+    'db' => 'mysql',
+    'host' => '127.0.0.1',
+    'charset' => 'utf8'
+]);
+
+// simple delete
+if ($db->query("DELETE FROM test WHERE id < ?", [10])) {
+    echo sprintf("%d records deleted", $db->affectedRows()) . \PHP_EOL;
+} else {
+    echo $db->getError() . \PHP_EOL;
+}
+```
+
+**Note**: named parameters are not supported in Mysqli driver.
+
 Driver manager
 ---
 Driver manager manages multiple db connections. Weighting factor `N` means add
