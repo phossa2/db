@@ -139,17 +139,42 @@ class Result extends ResultAbstract
                 return $row;
             }
         }
-
         return false;
     }
 
     /**
-     * Bind result
+     * Bind results
      *
      * @return bool
      * @access protected
      */
     protected function bindResult()/*# : bool */
+    {
+        // get fields first
+        if (!$this->getFields()) {
+            return false;
+        }
+
+        // bind values
+        if (null === $this->vals) {
+            $this->vals = array_fill(0, count($this->cols), null);
+
+            $refs = [];
+            foreach ($this->vals as $i => &$f) {
+                $refs[$i] = &$f;
+            }
+            call_user_func_array([$this->statement, 'bind_result'], $refs);
+        }
+        return true;
+    }
+
+    /**
+     * Get fields first
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function getFields()/*# : bool */
     {
         if (null === $this->cols) {
             $result = $this->statement->result_metadata();
@@ -161,15 +186,6 @@ class Result extends ResultAbstract
             foreach ($result->fetch_fields() as $col) {
                 $this->cols[] = $col->name;
             }
-
-            // bind values
-            $this->vals = array_fill(0, count($this->cols), null);
-
-            $refs = [];
-            foreach ($this->vals as $i => &$f) {
-                $refs[$i] = &$f;
-            }
-            call_user_func_array([$this->statement, 'bind_result'], $refs);
         }
         return true;
     }
