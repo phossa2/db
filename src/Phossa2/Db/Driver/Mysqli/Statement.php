@@ -12,7 +12,7 @@
  */
 /*# declare(strict_types=1); */
 
-namespace Phossa2\Db\Driver\Pdo;
+namespace Phossa2\Db\Driver\Mysqli;
 
 use Phossa2\Db\Types;
 use Phossa2\Db\Driver\StatementAbstract;
@@ -21,7 +21,7 @@ use Phossa2\Db\Interfaces\ResultInterface;
 /**
  * Statement
  *
- * PDO driver statement
+ * Mysqli driver statement
  *
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
@@ -47,7 +47,7 @@ class Statement extends StatementAbstract
      */
     protected function realPrepare($link, /*# string */ $sql)
     {
-        /* @var $link \PDO */
+        /* @var $link \mysqli */
         return $link->prepare($sql);
     }
 
@@ -56,18 +56,24 @@ class Statement extends StatementAbstract
      */
     protected function realExecute(array $parameters)/*# : bool */
     {
-        /* @var $stmt \PDOStatement */
+        /** @var $stmt \mysqli_stmt */
         $stmt = $this->prepared;
 
         // bind parameters
         if (!empty($parameters) &&
             !$this->bindParameters($stmt, $parameters)
         ) {
+            // bind failure
             return false;
         }
 
-        // execute
-        return $stmt->execute();
+        $res = $stmt->execute();
+
+        if ($stmt->result_metadata()) {
+            $stmt->store_result();
+        }
+
+        return $res;
     }
 
     /**
@@ -75,41 +81,41 @@ class Statement extends StatementAbstract
      */
     protected function realClose($stmt)
     {
+        /* @var $stmt \mysqli_stmt */
+        //$stmt->close();
     }
 
     /**
      * bind parameters
      *
-     * @param  \PDOStatement $stmt
+     * @param  \mysqli_stmt $stmt
      * @param  array $parameters
      * @return bool
      * @access protected
      */
     protected function bindParameters(
-        \PDOStatement $stmt,
+        \mysqli_stmt $stmt,
         array $parameters
     )/*# : bool */ {
+        $types = '';
+        $args  = [];
         foreach ($parameters as $name => &$value) {
-            $type  = Types::guessType($value);
-            $param = $this->fixParam($name);
-            if (false === $stmt->bindParam($param, $value, $type)) {
-                return false;
+            $type = Types::guessType($value);
+            switch ($type) {
+                case Types::PARAM_INT:
+                case Types::PARAM_BOOL:
+                    $types .= 'i';
+                    break;
+                default:
+                    $types .= 's';
+                    break;
             }
+            $args[] = &$value;
+        }
+        if (count($args)) {
+            array_unshift($args, $types);
+            return call_user_func_array([$stmt, 'bind_param'], $args);
         }
         return true;
-    }
-
-    /**
-     * Fix param name
-     *
-     * @param  mixed $name
-     * @return string
-     * @access protected
-     */
-    protected function fixParam($name)/*# : string */
-    {
-        return is_int($name) ?
-            ($name + 1) :
-            ($name[0] === ':' ? $name : (':' . $name));
     }
 }

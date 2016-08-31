@@ -87,4 +87,11 @@ interface ResultInterface
      * @access public
      */
     public function fetchCol($col = 0, $rowCount = 0)/*# : array */;
+
+    /**
+     * Close the result set
+     *
+     * @access public
+     */
+    public function close();
 }

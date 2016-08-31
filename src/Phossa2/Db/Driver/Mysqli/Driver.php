@@ -12,7 +12,7 @@
  */
 /*# declare(strict_types=1); */
 
-namespace Phossa2\Db\Driver\Pdo;
+namespace Phossa2\Db\Driver\Mysqli;
 
 use Phossa2\Db\Message\Message;
 use Phossa2\Db\Driver\DriverAbstract;
@@ -22,7 +22,7 @@ use Phossa2\Db\Interfaces\StatementInterface;
 /**
  * Driver
  *
- * PDO driver
+ * Mysqli driver
  *
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
@@ -35,23 +35,21 @@ class Driver extends DriverAbstract
     /**
      * the connection link
      *
-     * @var    \PDO
+     * @var    \mysqli
      * @access protected
      */
     protected $link;
 
     /**
-     * Default PDO attributes
+     * Default mysqli attributes
      *
      * @var    array
      * @access protected
      */
     protected $attributes = [
-        'PDO::ATTR_ERRMODE' => \PDO::ERRMODE_SILENT,
-        'PDO::ATTR_CASE' => \PDO::CASE_NATURAL,
-        'PDO::ATTR_ORACLE_NULLS' => \PDO::NULL_NATURAL,
-        'PDO::ATTR_DEFAULT_FETCH_MODE' => \PDO::FETCH_ASSOC,
-        'PDO::ATTR_EMULATE_PREPARES' => false,
+        'MYSQLI_OPT_CONNECT_TIMEOUT' => 300,
+        'MYSQLI_OPT_LOCAL_INFILE' => true,
+        'MYSQLI_INIT_COMMAND' => '',
     ];
 
     /**
@@ -78,7 +76,7 @@ class Driver extends DriverAbstract
      */
     protected function extensionLoaded()/*# : bool */
     {
-        return extension_loaded('PDO');
+        return extension_loaded('mysqli');
     }
 
     /**
@@ -86,7 +84,7 @@ class Driver extends DriverAbstract
      */
     protected function realLastId($name)
     {
-        return $this->link->lastInsertId($name);
+        return $this->link->insert_id;
     }
 
     /**
@@ -96,7 +94,7 @@ class Driver extends DriverAbstract
         $string,
         /*# int */ $type
     )/*# : string */ {
-        return $this->link->quote($string, $type);
+        return '\'' . $this->link->real_escape_string($string) . '\'';
     }
 
     /**
@@ -104,12 +102,26 @@ class Driver extends DriverAbstract
      */
     protected function realConnect(array $parameters)
     {
-        $link = new \PDO(
-            $parameters['dsn'],
+        // init
+        $link = new \mysqli();
+        $link->init();
+
+        // real connect
+        $link->real_connect(
+            isset($parameters['host']) ? $parameters['host'] : 'localhost',
             isset($parameters['username']) ? $parameters['username'] : 'root',
             isset($parameters['password']) ? $parameters['password'] : null,
-            isset($parameters['options']) ? $parameters['options'] : null
+            isset($parameters['db']) ? $parameters['db'] : null,
+            isset($parameters['port']) ? (int) $parameters['port'] : null,
+            isset($parameters['socket']) ? $parameters['socket'] : null
         );
+
+        // check failure
+        $this->isConenctFailed($link);
+
+        // set charset
+        $this->setCharset($link, $parameters);
+
         return $link;
     }
 
@@ -120,6 +132,7 @@ class Driver extends DriverAbstract
      */
     protected function realDisconnect()
     {
+        $this->link->close();
     }
 
     /**
@@ -127,11 +140,7 @@ class Driver extends DriverAbstract
      */
     protected function realPing()/*# : bool */
     {
-        try {
-            return (bool) $this->link->query('SELECT 1');
-        } catch (\Exception $e) {
-            return $this->setError($e->getMessage(), $e->getCode());
-        }
+        return $this->link->ping();
     }
 
     /**
@@ -141,9 +150,9 @@ class Driver extends DriverAbstract
     {
         if (is_string($attribute)) {
             $this->checkAttribute($attribute);
-            $this->link->setAttribute(constant($attribute), $value);
+            $this->link->options(constant($attribute), $value);
         } else {
-            $this->link->setAttribute($attribute, $value);
+            $this->link->options($attribute, $value);
         }
         return $this;
     }
@@ -155,10 +164,8 @@ class Driver extends DriverAbstract
     {
         if (is_string($attribute)) {
             $this->checkAttribute($attribute);
-            return $this->link->getAttribute(constant($attribute));
-        } else {
-            return $this->link->getAttribute($attribute);
         }
+        return null;
     }
 
     /**
@@ -166,7 +173,7 @@ class Driver extends DriverAbstract
      */
     protected function realBegin()
     {
-        $this->link->beginTransaction();
+        $this->link->autocommit(false);
         return $this;
     }
 
@@ -176,6 +183,7 @@ class Driver extends DriverAbstract
     protected function realCommit()
     {
         $this->link->commit();
+        $this->link->autocommit(true);
         return $this;
     }
 
@@ -184,8 +192,43 @@ class Driver extends DriverAbstract
      */
     protected function realRollback()
     {
-        $this->link->rollBack();
+        $this->link->rollback();
+        $this->link->autocommit(true);
         return $this;
+    }
+
+    /**
+     *
+     * @param  \mysqli $link
+     * @throws LogicException if failed
+     * @access protected
+     */
+    protected function isConenctFailed(\mysqli $link)
+    {
+        if ($link->connect_error) {
+            throw new LogicException(
+                Message::get(
+                    Message::DB_CONNECT_FAIL,
+                    $link->connect_errno,
+                    $link->connect_error
+                ),
+                Message::DB_CONNECT_FAIL
+            );
+        }
+    }
+
+    /**
+     * Set charset
+     *
+     * @param  \mysqli $link
+     * @param  array $params
+     * @access protected
+     */
+    protected function setCharset(\mysqli $link, array $params)
+    {
+        if (!empty($params['charset'])) {
+            $link->set_charset($params['charset']);
+        }
     }
 
     /**

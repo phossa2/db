@@ -40,6 +40,16 @@ abstract class ResultAbstract extends ObjectAbstract implements ResultInterface
     protected $fetched = false;
 
     /**
+     * Desctructor
+     *
+     * @access public
+     */
+    public function __destruct()
+    {
+        $this->close();
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function isSelect()/*# : bool */

@@ -73,6 +73,16 @@ class Result extends ResultAbstract
     /**
      * {@inheritDoc}
      */
+    public function close()
+    {
+        if ($this->statement) {
+            $this->statement->closeCursor();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     protected function realFetchAll()/*# : array */
     {
         return $this->statement->fetchAll(\PDO::FETCH_ASSOC);

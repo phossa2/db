@@ -72,6 +72,25 @@ class Manager extends ObjectAbstract implements ManagerInterface
     protected $factors = [];
 
     /**
+     * Ping driver before returns it
+     *
+     * @var    bool
+     * @access protected
+     */
+    protected $ping_driver = false;
+
+    /**
+     * Constructor
+     *
+     * @param  array $properties
+     * @access public
+     */
+    public function __construct(array $properties = [])
+    {
+        $this->setProperties($properties);
+    }
+
+    /**
      * Specify a weighting factor for the driver. normally 1 - 10
      *
      * {@inheritDoc}
@@ -148,7 +167,7 @@ class Manager extends ObjectAbstract implements ManagerInterface
     {
         $matched = [];
         foreach ($this->drivers as $id => $driver) {
-            if ($driver->ping() && $this->tagMatched($tag, $driver)) {
+            if ($this->tagMatched($tag, $driver) && $this->pingDriver($driver)) {
                 $this->expandWithFactor($matched, $id);
             }
         }
@@ -194,5 +213,16 @@ class Manager extends ObjectAbstract implements ManagerInterface
         }
 
         return false;
+    }
+
+    /**
+     * Ping driver before match it
+     *
+     * @param  DriverInterface $driver
+     * @access protected
+     */
+    protected function pingDriver(DriverInterface $driver)/*# : bool */
+    {
+        return $this->ping_driver ? $driver->ping(true) : true;
     }
 }

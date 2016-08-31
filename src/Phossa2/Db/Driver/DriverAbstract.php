@@ -151,8 +151,8 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         array $parameters = []
     )/*# : bool */ {
         try {
-            $this->prepare($sql) && $this->statement->execute($parameters);
-            return true;
+            return $this->prepare($sql) &&
+                $this->statement->execute($parameters);
         } catch (\Exception $e) {
             return $this->setError($e->getMessage(), $e->getCode());
         }

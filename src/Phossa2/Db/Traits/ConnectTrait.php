@@ -67,7 +67,7 @@ trait ConnectTrait
             $this->link = $this->realConnect($this->connect_parameters);
             $this->setDefaultAttributes();
         } catch (\Exception $e) {
-            throw new LogicException($e->getMessage(), $e->getCode());
+            throw new LogicException($e->getMessage(), (int) $e->getCode(), $e);
         }
         return $this;
     }
@@ -95,14 +95,17 @@ trait ConnectTrait
     /**
      * {@inheritDoc}
      */
-    public function ping()/*# : bool */
+    public function ping(/*# bool */ $connect = false)/*# : bool */
     {
-        try {
-            $this->connect();
-        } catch (\Exception $e) {
-            return $this->setError($e->getMessage(), $e->getCode());
+        // force connect
+        if ($connect) {
+            try {
+                $this->connect();
+            } catch (\Exception $e) {
+                return $this->setError($e->getMessage(), $e->getCode());
+            }
         }
-        return $this->realPing();
+        return $this->isConnected() ? $this->realPing() : false;
     }
 
     /**

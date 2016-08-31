@@ -82,7 +82,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
                     return true;
                 }
             } catch (\Exception $e) {
-                throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
+                throw new RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
             }
             throw new RuntimeException(
                 Message::get(Message::DB_STMT_PREPARE_FAIL, $sql),
@@ -97,19 +97,23 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
     public function execute(array $parameters = [])/*# : bool */
     {
         $this->checkPreparation(); // must be prepared
-        $this->close(); // close previous result if any
+        $this->result = null; // close result if any
 
         // int profiler
         $time = microtime(true);
         $this->getDriver()->getProfiler()->setParameters($parameters);
 
-        if ($this->realExecute($parameters)) {
-            $result = clone $this->result_prototype;
-            $this->result = $result($this->prepared);
-            $this->getDriver()->getProfiler()->setExecutionTime(microtime(true) - $time);
-            return true;
+        try {
+            if ($this->realExecute($parameters)) {
+                $result = clone $this->result_prototype;
+                $this->result = $result($this->prepared);
+                $this->getDriver()->getProfiler()
+                    ->setExecutionTime(microtime(true) - $time);
+                return true;
+            }
+        } catch (\Exception $e) {
+            throw new RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
         }
-
         throw new RuntimeException(
             Message::get(
                 Message::DB_STMT_EXECUTE_FAIL,
@@ -181,7 +185,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
     abstract protected function realExecute(array $parameters)/*# : bool */;
 
     /**
-     * Close statement's result set
+     * Close statement
      *
      * @param  mixed prepared low-level statement
      * @access protected

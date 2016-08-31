@@ -59,11 +59,12 @@ interface ConnectInterface
     /**
      * Is connection alive
      *
+     * @param  bool $connect force connect first
      * @return bool
      * @access public
      * @api
      */
-    public function ping()/*# : bool */;
+    public function ping(/*# bool */ $connect = false)/*# : bool */;
 
     /**
      * Get the connection link
