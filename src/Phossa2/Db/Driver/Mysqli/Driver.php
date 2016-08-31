@@ -107,23 +107,14 @@ class Driver extends DriverAbstract
         $link->init();
 
         // params with defaults
-        $params = array_replace([
-            'host' => 'localhost', 'username' => 'root', 'password' => null,
-            'db' => null, 'port' => null, 'socket' => null
-        ], $parameters);
+        $p = $this->fixParams($parameters);
 
         // real connect
-        $link->real_connect(
-            $params['host'], $params['username'], $params['password'],
-            $params['db'], $params['port'], $params['socket']
-        );
+        $link->real_connect($p['host'], $p['username'], $p['password'],
+            $p['db'], $p['port'], $p['socket']);
 
-        // check failure
         $this->isConenctFailed($link);
-
-        // set charset
         $this->setCharset($link, $parameters);
-
         return $link;
     }
 
@@ -197,6 +188,25 @@ class Driver extends DriverAbstract
         $this->link->rollback();
         $this->link->autocommit(true);
         return $this;
+    }
+
+    /**
+     * Fill connect params with defaults
+     *
+     * @param  array $params
+     * @return array
+     * @access protected
+     */
+    protected function fixParams(array $params)/*# : array */
+    {
+        return array_replace([
+            'host' => 'localhost',
+            'username' => 'root',
+            'password' => null,
+            'db' => null,
+            'port' => null,
+            'socket' => null
+        ], $params);
     }
 
     /**
