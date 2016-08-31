@@ -106,14 +106,16 @@ class Driver extends DriverAbstract
         $link = new \mysqli();
         $link->init();
 
+        // params with defaults
+        $params = array_replace([
+            'host' => 'localhost', 'username' => 'root', 'password' => null,
+            'db' => null, 'port' => null, 'socket' => null
+        ], $parameters);
+
         // real connect
         $link->real_connect(
-            isset($parameters['host']) ? $parameters['host'] : 'localhost',
-            isset($parameters['username']) ? $parameters['username'] : 'root',
-            isset($parameters['password']) ? $parameters['password'] : null,
-            isset($parameters['db']) ? $parameters['db'] : null,
-            isset($parameters['port']) ? (int) $parameters['port'] : null,
-            isset($parameters['socket']) ? $parameters['socket'] : null
+            $params['host'], $params['username'], $params['password'],
+            $params['db'], $params['port'], $params['socket']
         );
 
         // check failure

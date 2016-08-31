@@ -98,10 +98,7 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     public function execute(array $parameters = [])/*# : bool */
     {
-        // must be prepared
         $this->checkPreparation();
-
-        // int profiler
         $this->getDriver()->getProfiler()->setParameters($parameters)->startWatch();
 
         try {
