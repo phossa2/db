@@ -82,7 +82,7 @@ class Statement extends StatementAbstract
     protected function realClose($stmt)
     {
         /* @var $stmt \mysqli_stmt */
-        //$stmt->close();
+        $stmt->close();
     }
 
     /**

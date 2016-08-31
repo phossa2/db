@@ -75,7 +75,7 @@ class Result extends ResultAbstract
      */
     public function rowCount()/*# : int */
     {
-        return $this->statement->num_rows();
+        return $this->statement->num_rows;
     }
 
     /**
@@ -101,16 +101,7 @@ class Result extends ResultAbstract
      */
     protected function realFetchAll()/*# : array */
     {
-        $result = [];
-        while(true) {
-            $row = $this->getOneRow();
-            if (is_array($row)) {
-                $result[] = $row;
-            } else {
-                break;
-            }
-        }
-        return $result;
+        return $this->realFetchRow(100000);
     }
 
     /**
@@ -118,7 +109,7 @@ class Result extends ResultAbstract
      */
     protected function realFetchRow($rowCount)/*# : array */
     {
-        $count  = 0;
+        $count = 0;
         $result = [];
         while ($count++ < $rowCount) {
             $row = $this->getOneRow();

@@ -11,13 +11,13 @@ class StatementTest extends \PHPUnit_Framework_TestCase
      *
      * @var Driver
      */
-    private $driver;
+    protected $driver;
 
     /**
      *
      * @var Statement
      */
-    private $statement;
+    protected $statement;
 
     /**
      * Prepares the environment before running a test.
@@ -67,15 +67,23 @@ class StatementTest extends \PHPUnit_Framework_TestCase
      */
     public function testExecute2()
     {
-        // must emulate
-        $this->driver->setAttribute('PDO::ATTR_EMULATE_PREPARES', true);
-
-        $this->statement->prepare("SELECT :idx, :color");
-        $this->statement->execute(['idx' => 1, 'color' => 'red']);
-        $this->assertEquals(
-            [[1 => "1", "red" => "red"]],
-            $this->statement->getResult()->fetchRow()
-        );
+        // PDO has named parameters but Mysqli NOT
+        if ($this->statement instanceof Statement) {
+            $this->driver->setAttribute('PDO::ATTR_EMULATE_PREPARES', true);
+            $this->statement->prepare("SELECT :idx, :color");
+            $this->statement->execute(['idx' => 1, 'color' => 'red']);
+            $this->assertEquals(
+                [[1 => "1", "red" => "red"]],
+                $this->statement->getResult()->fetchRow()
+            );
+        } else {
+            $this->statement->prepare("SELECT 1, ?");
+            $this->statement->execute(['red']);
+            $this->assertEquals(
+                [[1 => "1", "?" => "red"]],
+                $this->statement->getResult()->fetchRow()
+            );
+        }
     }
 }
 

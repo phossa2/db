@@ -73,22 +73,24 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     public function prepare(/*# string */ $sql)/*# : bool */
     {
-        if (null === $this->prepared) {
-            try {
-                $res = $this->realPrepare($this->getDriver()->getLink(), $sql);
-                if (false !== $res) {
-                    $this->prepared = $res;
-                    $this->getDriver()->getProfiler()->setSql($sql);
-                    return true;
-                }
-            } catch (\Exception $e) {
-                throw new RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
+        // close previous prepared sql if any
+        $this->close();
+
+        // prepare sql
+        try {
+            $res = $this->realPrepare($this->getDriver()->getLink(), $sql);
+            if (false !== $res) {
+                $this->prepared = $res;
+                $this->getDriver()->getProfiler()->setSql($sql);
+                return true;
             }
-            throw new RuntimeException(
-                Message::get(Message::DB_STMT_PREPARE_FAIL, $sql),
-                Message::DB_STMT_PREPARE_FAIL
-            );
+        } catch (\Exception $e) {
+            throw new RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
         }
+        throw new RuntimeException(
+            Message::get(Message::DB_STMT_PREPARE_FAIL, $sql),
+            Message::DB_STMT_PREPARE_FAIL
+        );
     }
 
     /**
@@ -96,8 +98,8 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     public function execute(array $parameters = [])/*# : bool */
     {
-        $this->checkPreparation(); // must be prepared
-        $this->result = null; // close result if any
+        // must be prepared
+        $this->checkPreparation();
 
         // int profiler
         $time = microtime(true);
@@ -142,8 +144,12 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
     public function close()
     {
         if ($this->prepared) {
+            // close result
+            $this->closeResult();
+
+            // close statement
             $this->realClose($this->prepared);
-            $this->result = null;
+            $this->prepared = null;
         }
     }
 
@@ -155,11 +161,28 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
      */
     protected function checkPreparation()
     {
+        // must be prepared
         if (null === $this->prepared) {
             throw new RuntimeException(
                 Message::get(Message::DB_STMT_NOTPREPARED),
                 Message::DB_STMT_NOTPREPARED
             );
+        }
+
+        // close any previous resultset
+        $this->closeResult();
+    }
+
+    /**
+     * Close resultset if any
+     *
+     * @access protected
+     */
+    protected function closeResult()
+    {
+        if ($this->result) {
+            $this->result->close();
+            $this->result = null;
         }
     }
 

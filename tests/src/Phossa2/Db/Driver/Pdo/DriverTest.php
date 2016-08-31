@@ -13,7 +13,7 @@ class DriverTest extends \PHPUnit_Framework_TestCase
      *
      * @var Driver
      */
-    private $object;
+    protected $object;
 
     /**
      * Prepares the environment before running a test.
