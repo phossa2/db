@@ -122,7 +122,6 @@ class Manager extends ObjectAbstract implements ManagerInterface
 
         if (count($matched) > 0) {
             return $this->drivers[$matched[rand(1, count($matched)) - 1]];
-
         } else {
             throw new NotFoundException(
                 Message::get(Message::DB_DRIVER_NOTFOUND),

@@ -127,7 +127,8 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
         $count = 0;
         $params = $this->params;
         return preg_replace_callback(
-            '/\?|\:\w+/', function($m) use ($count, $params) {
+            '/\?|\:\w+/',
+            function ($m) use ($count, $params) {
                 if ('?' === $m[0]) {
                     $res = $params[$count++];
                 } else {
@@ -135,6 +136,8 @@ class Profiler extends ObjectAbstract implements ProfilerInterface
                         $params[substr($m[0], 1)];
                 }
                 return $this->getDriver()->quote($res);
-            }, $this->sql);
+            },
+            $this->sql
+        );
     }
 }

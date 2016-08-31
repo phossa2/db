@@ -86,7 +86,7 @@ abstract class ResultAbstract extends ObjectAbstract implements ResultInterface
     {
         $rows = $rowCount ? $this->fetchRow($rowCount) : $this->fetchAll();
         $cols = [];
-        foreach($rows as $row) {
+        foreach ($rows as $row) {
             if (isset($row[$col])) {
                 $cols[] = $row[$col];
             }

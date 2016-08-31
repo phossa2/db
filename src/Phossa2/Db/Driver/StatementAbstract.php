@@ -111,9 +111,11 @@ abstract class StatementAbstract extends ObjectAbstract implements StatementInte
         } catch (\Exception $e) {
             throw new RuntimeException($e->getMessage(), (int) $e->getCode(), $e);
         }
-        throw new RuntimeException(Message::get(
-            Message::DB_STMT_EXECUTE_FAIL,
-            $this->getDriver()->getProfiler()->getSql()),
+        throw new RuntimeException(
+            Message::get(
+                Message::DB_STMT_EXECUTE_FAIL,
+                $this->getDriver()->getProfiler()->getSql()
+            ),
             Message::DB_STMT_EXECUTE_FAIL
         );
     }

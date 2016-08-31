@@ -110,8 +110,14 @@ class Driver extends DriverAbstract
         $p = $this->fixParams($parameters);
 
         // real connect
-        $link->real_connect($p['host'], $p['username'], $p['password'],
-            $p['db'], $p['port'], $p['socket']);
+        $link->real_connect(
+            $p['host'],
+            $p['username'],
+            $p['password'],
+            $p['db'],
+            $p['port'],
+            $p['socket']
+        );
 
         $this->isConenctFailed($link);
         $this->setCharset($link, $parameters);

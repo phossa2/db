@@ -133,7 +133,7 @@ class Result extends ResultAbstract
         if ($this->bindResult()) {
             if ($this->statement->fetch()) {
                 $row = [];
-                foreach($this->cols as $i => $col) {
+                foreach ($this->cols as $i => $col) {
                     $row[$col] = $this->vals[$i];
                 }
                 return $row;
@@ -178,7 +178,9 @@ class Result extends ResultAbstract
     {
         if (null === $this->cols) {
             $result = $this->statement->result_metadata();
-            if (false === $result) return false;
+            if (false === $result) {
+                return false;
+            }
 
             $this->cols = [];
 
