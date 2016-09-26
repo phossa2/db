@@ -25,8 +25,9 @@ use Phossa2\Db\Interfaces\DriverAwareInterface;
  * @package Phossa2\Db
  * @author  Hong Zhang <phossa@126.com>
  * @see     DriverAwareInterface
- * @version 2.0.0
+ * @version 2.0.1
  * @since   2.0.0 added
+ * @since   2.0.1 changed setDriver() signature
  */
 trait DriverAwareTrait
 {
@@ -40,8 +41,9 @@ trait DriverAwareTrait
 
     /**
      * {@inheritDoc}
+     * @since  2.0.1 able to set NULL
      */
-    public function setDriver(DriverInterface $driver)
+    public function setDriver(DriverInterface $driver = null)
     {
         $this->driver = $driver;
         return $this;
