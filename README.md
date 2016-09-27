@@ -53,7 +53,7 @@ or add the following lines to your `composer.json`
 ```json
 {
     "require": {
-       "phossa2/db": "^2.0.0"
+       "phossa2/db": "2.*"
     }
 }
 ```
